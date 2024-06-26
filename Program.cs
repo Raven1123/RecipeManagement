@@ -10,7 +10,7 @@ namespace RecipeManagementConsole
         {
             RecipeServices recipeServices = new RecipeServices();
 
-            // Example usage
+            
             var recipes = recipeServices.GetAllRecipes();
 
             foreach (var recipe in recipes)
