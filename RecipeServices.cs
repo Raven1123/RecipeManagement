@@ -1,37 +1,73 @@
-using RecipeManagementData;
-using RecipeManagementModels;
+﻿using System;
 using System.Collections.Generic;
+using RecipeManagement.Models;
+using RecipeManagement.Data;
 
-namespace RecipeManagementServices
+namespace RecipeManagement.Services
+
 {
     public class RecipeServices
     {
-        private RecipeData recipeData = new RecipeData();
+        private RecipeData _recipeData;
 
-        public List<Recipe> GetAllRecipes()
+        public RecipeServices()
         {
-            return recipeData.GetRecipes();
+            _recipeData = new RecipeData();
         }
 
-        public Recipe GetRecipeById(int id)
+        public bool AddRecipe(Recipe recipe)
         {
-            var recipes = recipeData.GetRecipes();
-            return recipes.Find(r => r.Id == id);
-        }
-
-        public int AddRecipe(Recipe recipe)
-        {
-            return recipeData.AddRecipe(recipe);
+            try
+            {
+                int rowsAffected = _recipeData.AddRecipe(recipe);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding recipe: {ex.Message}");
+                return false;
+            }
         }
 
         public bool UpdateRecipe(Recipe recipe)
         {
-            return recipeData.UpdateRecipe(recipe) > 0;
+            try
+            {
+                int rowsAffected = _recipeData.UpdateRecipe(recipe);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating recipe: {ex.Message}");
+                return false;
+            }
         }
 
-        public bool DeleteRecipe(int id)
+        public bool DeleteRecipe(string Recipe)
         {
-            return recipeData.DeleteRecipe(id) > 0;
+            try
+            {
+               int rowsAffected = _recipeData.DeleteRecipe(Recipe);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting recipe: {ex.Message}");
+                return false;
+            }
+        }
+
+        public List<Recipe> GetAllRecipes()
+        {
+            try
+            {
+                return _recipeData.GetRecipes();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving recipes: {ex.Message}");
+                return new List<Recipe>(); 
+            }
         }
     }
 }
