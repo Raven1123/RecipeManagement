@@ -1,74 +1,78 @@
 using Microsoft.AspNetCore.Mvc;
-using RecipeManagementServices;
-using RecipeManagementModels;
-using System.Collections.Generic;
+using RecipeManagement.Models; 
+using RecipeManagement.Services; 
 
-namespace RecipeManagementAPI.Controllers
+namespace Name.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RecipesController : ControllerBase
+    public class foodController : ControllerBase
     {
         private readonly RecipeServices _recipeServices;
 
-        public RecipesController()
+        public foodController()
         {
             _recipeServices = new RecipeServices();
         }
 
+        // GET: api/info
         [HttpGet]
-        public ActionResult<IEnumerable<Recipe>> GetAllRecipes()
+        public ActionResult GetAllRecipes()
         {
-            return _recipeServices.GetAllRecipes();
+            var recipes = _recipeServices.GetAllRecipes();
+            return Ok(recipes);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Recipe> GetRecipeById(int id)
-        {
-            var recipe = _recipeServices.GetRecipeById(id);
-            if (recipe == null)
-            {
-                return NotFound();
-            }
-            return recipe;
-        }
-
+        // POST: api/info
         [HttpPost]
         public ActionResult AddRecipe([FromBody] Recipe recipe)
         {
-            int result = _recipeServices.AddRecipe(recipe);
-            if (result > 0)
+            if (recipe == null)
             {
-                return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.Id }, recipe);
+                return BadRequest("Recipe object is null");
             }
-            return BadRequest();
+
+            if (_recipeServices.AddRecipe(recipe))
+            {
+                return CreatedAtAction(nameof(GetAllRecipes), new { name = recipe.Name }, recipe);
+            }
+            else
+            {
+                return StatusCode(500, "Error adding recipe");
+            }
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateRecipe(int id, [FromBody] Recipe recipe)
+        // PATCH: api/info/{infoName}
+        [HttpPatch("{recipeName}")]
+        public ActionResult UpdateRecipe(string recipeName, [FromBody] Recipe recipe)
         {
-            if (id != recipe.Id)
+            if (recipe == null || recipe.Name != recipe.Name)
             {
-                return BadRequest();
+                return BadRequest("Recipe object or name mismatch");
             }
 
-            bool result = _recipeServices.UpdateRecipe(recipe);
-            if (result)
+            if (_recipeServices.UpdateRecipe(recipe))
+            {
+                return Ok(recipe);
+            }
+            else
+            {
+                return StatusCode(500, $"Error updating info with name {recipeName}");
+            }
+        }
+
+        // DELETE: api/info/{infoName}
+        [HttpDelete("{recipeName}")]
+        public ActionResult DeleteRecipe(string recipeName)
+        {
+            if (_recipeServices.DeleteRecipe(recipeName))
             {
                 return NoContent();
             }
-            return NotFound();
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteRecipe(int id)
-        {
-            bool result = _recipeServices.DeleteRecipe(id);
-            if (result)
+            else
             {
-                return NoContent();
+                return StatusCode(500, $"Error deleting info with name {recipeName}");
             }
-            return NotFound();
         }
     }
 }
